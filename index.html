@@ -997,4 +997,32 @@
             );
         </script>
     </body>
+  <script>
+    // Chuyển sang tiếng Việt khi mở trang lần đầu
+    window.onload = function () {
+      const lang = localStorage.getItem("lang") || "vi";
+      if (lang === "vi") {
+        setVietnamese();
+      } else {
+        setEnglish();
+      }
+    }
+
+    function setVietnamese() {
+      document.querySelector("h1").innerText = "Nhắc nhở sức khỏe";
+      document.querySelector("#hydration-label").innerText = "Nhắc uống nước (mỗi 60 phút)";
+      document.querySelector("#movement-label").innerText = "Nhắc vận động (mỗi 90 phút)";
+      document.querySelector("#eye-label").innerText = "Nhắc nghỉ mắt (mỗi 45 phút)";
+      localStorage.setItem("lang", "vi");
+    }
+
+    function setEnglish() {
+      document.querySelector("h1").innerText = "Health Reminder";
+      document.querySelector("#hydration-label").innerText = "Remind to drink water (every 60 minutes)";
+      document.querySelector("#movement-label").innerText = "Remind to move (every 90 minutes)";
+      document.querySelector("#eye-label").innerText = "Remind eye rest (every 45 minutes)";
+      localStorage.setItem("lang", "en");
+    }
+  </script>
+</body>
 </html>
