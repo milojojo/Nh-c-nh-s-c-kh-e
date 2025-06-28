@@ -1,0 +1,1000 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>HealthyWork - Office Health Reminders</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            body {
+                font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                min-height: 100vh;
+                padding: 20px;
+                color: #333;
+            }
+
+            .container {
+                max-width: 800px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 15px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                overflow: hidden;
+            }
+
+            .header {
+                background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+                color: white;
+                padding: 30px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 2.5rem;
+                margin-bottom: 10px;
+                font-weight: 300;
+            }
+
+            .header p {
+                font-size: 1.1rem;
+                opacity: 0.9;
+            }
+
+            .tabs {
+                display: flex;
+                background: #f8f9fa;
+                border-bottom: 1px solid #dee2e6;
+            }
+
+            .tab {
+                flex: 1;
+                padding: 15px;
+                text-align: center;
+                background: none;
+                border: none;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: 500;
+                transition: all 0.3s ease;
+                color: #666;
+            }
+
+            .tab.active {
+                background: white;
+                color: #4caf50;
+                border-bottom: 3px solid #4caf50;
+            }
+
+            .tab:hover {
+                background: #e9ecef;
+            }
+
+            .content {
+                padding: 30px;
+            }
+
+            .tab-content {
+                display: none;
+            }
+
+            .tab-content.active {
+                display: block;
+            }
+
+            .reminder-card {
+                background: #f8f9fa;
+                border-radius: 10px;
+                padding: 25px;
+                margin-bottom: 20px;
+                border-left: 5px solid;
+                transition: all 0.3s ease;
+            }
+
+            .reminder-card:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            }
+
+            .reminder-card.water {
+                border-left-color: #2196f3;
+            }
+
+            .reminder-card.movement {
+                border-left-color: #ff9800;
+            }
+
+            .reminder-card.eyes {
+                border-left-color: #9c27b0;
+            }
+
+            .reminder-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 15px;
+            }
+
+            .reminder-title {
+                font-size: 1.3rem;
+                font-weight: 600;
+                margin: 0;
+            }
+
+            .reminder-interval {
+                color: #666;
+                font-size: 0.9rem;
+                margin-bottom: 10px;
+            }
+
+            .reminder-description {
+                color: #555;
+                line-height: 1.6;
+                margin-bottom: 15px;
+            }
+
+            .reminder-status {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .status-info {
+                font-size: 0.9rem;
+                color: #666;
+            }
+
+            .toggle-switch {
+                position: relative;
+                display: inline-block;
+                width: 60px;
+                height: 34px;
+            }
+
+            .toggle-switch input {
+                opacity: 0;
+                width: 0;
+                height: 0;
+            }
+
+            .slider {
+                position: absolute;
+                cursor: pointer;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: #ccc;
+                transition: 0.4s;
+                border-radius: 34px;
+            }
+
+            .slider:before {
+                position: absolute;
+                content: "";
+                height: 26px;
+                width: 26px;
+                left: 4px;
+                bottom: 4px;
+                background-color: white;
+                transition: 0.4s;
+                border-radius: 50%;
+            }
+
+            input:checked + .slider {
+                background-color: #4caf50;
+            }
+
+            input:checked + .slider:before {
+                transform: translateX(26px);
+            }
+
+            .controls {
+                background: #f8f9fa;
+                padding: 20px;
+                border-radius: 10px;
+                margin-bottom: 20px;
+            }
+
+            .controls h3 {
+                margin-bottom: 15px;
+                color: #333;
+            }
+
+            .control-group {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+
+            .notification-popup {
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: white;
+                border-radius: 10px;
+                padding: 20px;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                z-index: 1000;
+                min-width: 300px;
+                max-width: 400px;
+                border-left: 5px solid #4caf50;
+                animation: slideIn 0.3s ease;
+                display: none;
+            }
+
+            .notification-popup.water {
+                border-left-color: #2196f3;
+            }
+
+            .notification-popup.movement {
+                border-left-color: #ff9800;
+            }
+
+            .notification-popup.eyes {
+                border-left-color: #9c27b0;
+            }
+
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+
+            .notification-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 10px;
+            }
+
+            .notification-title {
+                font-weight: 600;
+                font-size: 1.1rem;
+            }
+
+            .close-btn {
+                background: none;
+                border: none;
+                font-size: 20px;
+                cursor: pointer;
+                color: #999;
+                padding: 0;
+                width: 24px;
+                height: 24px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .close-btn:hover {
+                background: #f0f0f0;
+                color: #666;
+            }
+
+            .notification-message {
+                color: #555;
+                line-height: 1.5;
+                margin-bottom: 15px;
+            }
+
+            .notification-actions {
+                display: flex;
+                gap: 10px;
+            }
+
+            .btn {
+                padding: 8px 16px;
+                border: none;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 14px;
+                transition: all 0.3s ease;
+            }
+
+            .btn-primary {
+                background: #4caf50;
+                color: white;
+            }
+
+            .btn-primary:hover {
+                background: #45a049;
+            }
+
+            .btn-secondary {
+                background: #6c757d;
+                color: white;
+            }
+
+            .btn-secondary:hover {
+                background: #5a6268;
+            }
+
+            .instructions {
+                line-height: 1.8;
+            }
+
+            .instructions h3 {
+                color: #4caf50;
+                margin: 20px 0 10px 0;
+            }
+
+            .instructions ul {
+                margin-left: 20px;
+                margin-bottom: 15px;
+            }
+
+            .instructions li {
+                margin-bottom: 8px;
+            }
+
+            .icon {
+                font-size: 1.5rem;
+                margin-right: 10px;
+            }
+
+            .water .icon {
+                color: #2196f3;
+            }
+
+            .movement .icon {
+                color: #ff9800;
+            }
+
+            .eyes .icon {
+                color: #9c27b0;
+            }
+
+            @media (max-width: 768px) {
+                .container {
+                    margin: 10px;
+                    border-radius: 10px;
+                }
+
+                .header {
+                    padding: 20px;
+                }
+
+                .header h1 {
+                    font-size: 2rem;
+                }
+
+                .content {
+                    padding: 20px;
+                }
+
+                .reminder-card {
+                    padding: 20px;
+                }
+
+                .notification-popup {
+                    top: 10px;
+                    right: 10px;
+                    left: 10px;
+                    min-width: auto;
+                }
+
+                .tabs {
+                    flex-direction: column;
+                }
+
+                .tab {
+                    border-bottom: 1px solid #dee2e6;
+                }
+
+                .tab.active {
+                    border-bottom: 3px solid #4caf50;
+                }
+            }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🏢 HealthyWork</h1>
+                <p>Stay healthy and productive during your workday</p>
+            </div>
+
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('reminders')">
+                    Reminders
+                </button>
+                <button class="tab" onclick="switchTab('instructions')">
+                    How to Use
+                </button>
+            </div>
+
+            <div class="content">
+                <!-- Reminders Tab -->
+                <div id="reminders" class="tab-content active">
+                    <div class="controls">
+                        <h3>General Settings</h3>
+                        <div class="control-group">
+                            <label for="soundEnabled"
+                                >Enable notification sounds</label
+                            >
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="soundEnabled" />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="control-group">
+                            <label for="browserNotifications"
+                                >Enable browser notifications</label
+                            >
+                            <label class="toggle-switch">
+                                <input
+                                    type="checkbox"
+                                    id="browserNotifications"
+                                />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Water Reminder -->
+                    <div class="reminder-card water">
+                        <div class="reminder-header">
+                            <h3 class="reminder-title">
+                                <span class="icon">💧</span>
+                                Hydration Reminder
+                            </h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="waterToggle" />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="reminder-interval">Every 60 minutes</div>
+                        <div class="reminder-description">
+                            Stay hydrated! Drinking water regularly helps
+                            maintain focus, energy levels, and overall health
+                            during long work sessions.
+                        </div>
+                        <div class="reminder-status">
+                            <span class="status-info" id="waterStatus"
+                                >Not active</span
+                            >
+                            <span class="status-info" id="waterNext"></span>
+                        </div>
+                    </div>
+
+                    <!-- Movement Reminder -->
+                    <div class="reminder-card movement">
+                        <div class="reminder-header">
+                            <h3 class="reminder-title">
+                                <span class="icon">🤸</span>
+                                Movement Break
+                            </h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="movementToggle" />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="reminder-interval">Every 90 minutes</div>
+                        <div class="reminder-description">
+                            Stand up and stretch! Regular movement helps prevent
+                            stiffness, improves circulation, and boosts
+                            productivity.
+                        </div>
+                        <div class="reminder-status">
+                            <span class="status-info" id="movementStatus"
+                                >Not active</span
+                            >
+                            <span class="status-info" id="movementNext"></span>
+                        </div>
+                    </div>
+
+                    <!-- Eye Care Reminder -->
+                    <div class="reminder-card eyes">
+                        <div class="reminder-header">
+                            <h3 class="reminder-title">
+                                <span class="icon">👁️</span>
+                                Eye Care Break
+                            </h3>
+                            <label class="toggle-switch">
+                                <input type="checkbox" id="eyesToggle" />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div class="reminder-interval">Every 45 minutes</div>
+                        <div class="reminder-description">
+                            Give your eyes a rest! Look at something 20 feet
+                            away for 20 seconds to reduce eye strain and
+                            fatigue.
+                        </div>
+                        <div class="reminder-status">
+                            <span class="status-info" id="eyesStatus"
+                                >Not active</span
+                            >
+                            <span class="status-info" id="eyesNext"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions Tab -->
+                <div id="instructions" class="tab-content">
+                    <div class="instructions">
+                        <h3>🚀 Getting Started</h3>
+                        <p>
+                            Welcome to HealthyWork! This app helps you maintain
+                            good health habits while working at your desk.
+                            Here's how to use it:
+                        </p>
+
+                        <h3>💧 Hydration Reminder (Every 60 minutes)</h3>
+                        <ul>
+                            <li>Reminds you to drink water regularly</li>
+                            <li>Helps maintain proper hydration levels</li>
+                            <li>
+                                Keeps you alert and focused throughout the day
+                            </li>
+                        </ul>
+
+                        <h3>🤸 Movement Break (Every 90 minutes)</h3>
+                        <ul>
+                            <li>Encourages you to stand up and stretch</li>
+                            <li>
+                                Helps prevent back pain and muscle stiffness
+                            </li>
+                            <li>
+                                Improves blood circulation and energy levels
+                            </li>
+                        </ul>
+
+                        <h3>👁️ Eye Care Break (Every 45 minutes)</h3>
+                        <ul>
+                            <li>
+                                Reminds you to rest your eyes using the 20-20-20
+                                rule
+                            </li>
+                            <li>
+                                Look at something 20 feet away for 20 seconds
+                            </li>
+                            <li>Reduces eye strain from screen time</li>
+                        </ul>
+
+                        <h3>⚙️ Settings</h3>
+                        <ul>
+                            <li>
+                                <strong>Toggle switches:</strong> Turn
+                                individual reminders on or off
+                            </li>
+                            <li>
+                                <strong>Sound alerts:</strong> Enable or disable
+                                notification sounds
+                            </li>
+                            <li>
+                                <strong>Browser notifications:</strong> Get
+                                native browser notifications even when the tab
+                                isn't active
+                            </li>
+                            <li>
+                                <strong>Persistent settings:</strong> Your
+                                preferences are automatically saved
+                            </li>
+                        </ul>
+
+                        <h3>🔔 Notification Types</h3>
+                        <ul>
+                            <li>
+                                <strong>Custom popups:</strong> Always
+                                available, appear in the top-right corner
+                            </li>
+                            <li>
+                                <strong>Browser notifications:</strong> Native
+                                notifications that work even when the tab is in
+                                the background
+                            </li>
+                            <li>
+                                <strong>Sound alerts:</strong> Optional audio
+                                notification for each reminder
+                            </li>
+                        </ul>
+
+                        <h3>💡 Tips for Best Results</h3>
+                        <ul>
+                            <li>Keep this tab open during your work hours</li>
+                            <li>
+                                Allow browser notifications for the best
+                                experience
+                            </li>
+                            <li>
+                                Customize which reminders work best for your
+                                schedule
+                            </li>
+                            <li>
+                                Use the app consistently for maximum health
+                                benefits
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification Popup Template -->
+        <div id="notificationPopup" class="notification-popup">
+            <div class="notification-header">
+                <div class="notification-title" id="notificationTitle"></div>
+                <button class="close-btn" onclick="closeNotification()">
+                    &times;
+                </button>
+            </div>
+            <div class="notification-message" id="notificationMessage"></div>
+            <div class="notification-actions">
+                <button class="btn btn-primary" onclick="dismissNotification()">
+                    Got it!
+                </button>
+                <button
+                    class="btn btn-secondary"
+                    onclick="snoozeNotification()"
+                >
+                    Snooze 10min
+                </button>
+            </div>
+        </div>
+
+        <script>
+            // Application state
+            const app = {
+                timers: {
+                    water: null,
+                    movement: null,
+                    eyes: null,
+                },
+                intervals: {
+                    water: 60 * 60 * 1000, // 60 minutes
+                    movement: 90 * 60 * 1000, // 90 minutes
+                    eyes: 45 * 60 * 1000, // 45 minutes
+                },
+                settings: {
+                    water: false,
+                    movement: false,
+                    eyes: false,
+                    soundEnabled: true,
+                    browserNotifications: false,
+                },
+                audioContext: null,
+                currentNotification: null,
+            };
+
+            // Notification messages
+            const messages = {
+                water: {
+                    title: "💧 Time to Hydrate!",
+                    message:
+                        "Your body needs water to stay focused and energized. Take a moment to drink a glass of water. Your productivity and health will thank you!",
+                },
+                movement: {
+                    title: "🤸 Movement Break!",
+                    message:
+                        "You've been sitting for a while. Stand up, stretch your arms, roll your shoulders, and take a few steps. Your muscles and spine need this break!",
+                },
+                eyes: {
+                    title: "👁️ Eye Rest Time!",
+                    message:
+                        "Give your eyes a break from the screen. Look at something 20 feet away for 20 seconds, or close your eyes and relax. This helps prevent eye strain and fatigue.",
+                },
+            };
+
+            // Initialize the application
+            function init() {
+                loadSettings();
+                setupEventListeners();
+                requestNotificationPermission();
+                initAudioContext();
+                updateUI();
+            }
+
+            // Load settings from localStorage
+            function loadSettings() {
+                const saved = localStorage.getItem("healthywork-settings");
+                if (saved) {
+                    app.settings = { ...app.settings, ...JSON.parse(saved) };
+                }
+            }
+
+            // Save settings to localStorage
+            function saveSettings() {
+                localStorage.setItem(
+                    "healthywork-settings",
+                    JSON.stringify(app.settings),
+                );
+            }
+
+            // Setup event listeners
+            function setupEventListeners() {
+                // Toggle switches
+                document
+                    .getElementById("waterToggle")
+                    .addEventListener("change", (e) =>
+                        toggleReminder("water", e.target.checked),
+                    );
+                document
+                    .getElementById("movementToggle")
+                    .addEventListener("change", (e) =>
+                        toggleReminder("movement", e.target.checked),
+                    );
+                document
+                    .getElementById("eyesToggle")
+                    .addEventListener("change", (e) =>
+                        toggleReminder("eyes", e.target.checked),
+                    );
+                document
+                    .getElementById("soundEnabled")
+                    .addEventListener("change", (e) => {
+                        app.settings.soundEnabled = e.target.checked;
+                        saveSettings();
+                    });
+                document
+                    .getElementById("browserNotifications")
+                    .addEventListener("change", (e) => {
+                        app.settings.browserNotifications = e.target.checked;
+                        saveSettings();
+                        if (e.target.checked) {
+                            requestNotificationPermission();
+                        }
+                    });
+
+                // Update UI on settings load
+                document.getElementById("waterToggle").checked =
+                    app.settings.water;
+                document.getElementById("movementToggle").checked =
+                    app.settings.movement;
+                document.getElementById("eyesToggle").checked =
+                    app.settings.eyes;
+                document.getElementById("soundEnabled").checked =
+                    app.settings.soundEnabled;
+                document.getElementById("browserNotifications").checked =
+                    app.settings.browserNotifications;
+            }
+
+            // Initialize audio context for sound notifications
+            function initAudioContext() {
+                try {
+                    app.audioContext = new (window.AudioContext ||
+                        window.webkitAudioContext)();
+                } catch (e) {
+                    console.log("Web Audio API not supported");
+                }
+            }
+
+            // Play notification sound
+            function playNotificationSound() {
+                if (!app.settings.soundEnabled || !app.audioContext) return;
+
+                const oscillator = app.audioContext.createOscillator();
+                const gainNode = app.audioContext.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(app.audioContext.destination);
+
+                oscillator.frequency.setValueAtTime(
+                    800,
+                    app.audioContext.currentTime,
+                );
+                oscillator.frequency.setValueAtTime(
+                    600,
+                    app.audioContext.currentTime + 0.1,
+                );
+                oscillator.frequency.setValueAtTime(
+                    800,
+                    app.audioContext.currentTime + 0.2,
+                );
+
+                gainNode.gain.setValueAtTime(0.3, app.audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(
+                    0.01,
+                    app.audioContext.currentTime + 0.3,
+                );
+
+                oscillator.start(app.audioContext.currentTime);
+                oscillator.stop(app.audioContext.currentTime + 0.3);
+            }
+
+            // Request notification permission
+            function requestNotificationPermission() {
+                if (
+                    "Notification" in window &&
+                    Notification.permission === "default"
+                ) {
+                    Notification.requestPermission();
+                }
+            }
+
+            // Toggle reminder on/off
+            function toggleReminder(type, enabled) {
+                app.settings[type] = enabled;
+                saveSettings();
+
+                if (enabled) {
+                    startReminder(type);
+                } else {
+                    stopReminder(type);
+                }
+                updateUI();
+            }
+
+            // Start a reminder timer
+            function startReminder(type) {
+                stopReminder(type); // Clear existing timer
+                app.timers[type] = setTimeout(() => {
+                    showNotification(type);
+                    startReminder(type); // Restart timer for next occurrence
+                }, app.intervals[type]);
+            }
+
+            // Stop a reminder timer
+            function stopReminder(type) {
+                if (app.timers[type]) {
+                    clearTimeout(app.timers[type]);
+                    app.timers[type] = null;
+                }
+            }
+
+            // Show notification
+            function showNotification(type) {
+                app.currentNotification = type;
+                const popup = document.getElementById("notificationPopup");
+                const title = document.getElementById("notificationTitle");
+                const message = document.getElementById("notificationMessage");
+
+                title.textContent = messages[type].title;
+                message.textContent = messages[type].message;
+                popup.className = `notification-popup ${type}`;
+                popup.style.display = "block";
+
+                // Play sound
+                playNotificationSound();
+
+                // Show browser notification if enabled
+                if (
+                    app.settings.browserNotifications &&
+                    "Notification" in window &&
+                    Notification.permission === "granted"
+                ) {
+                    new Notification(messages[type].title, {
+                        body: messages[type].message,
+                        icon: "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzIiIGZpbGw9IiM0Q0FGNTAIDQ==",
+                        requireInteraction: false,
+                    });
+                }
+
+                // Auto-hide after 10 seconds
+                setTimeout(() => {
+                    if (popup.style.display === "block") {
+                        closeNotification();
+                    }
+                }, 10000);
+            }
+
+            // Close notification popup
+            function closeNotification() {
+                document.getElementById("notificationPopup").style.display =
+                    "none";
+                app.currentNotification = null;
+            }
+
+            // Dismiss notification
+            function dismissNotification() {
+                closeNotification();
+            }
+
+            // Snooze notification for 10 minutes
+            function snoozeNotification() {
+                if (app.currentNotification) {
+                    const type = app.currentNotification;
+                    closeNotification();
+
+                    // Set a 10-minute snooze timer
+                    setTimeout(
+                        () => {
+                            showNotification(type);
+                        },
+                        10 * 60 * 1000,
+                    );
+                }
+            }
+
+            // Switch between tabs
+            function switchTab(tabName) {
+                // Hide all tab contents
+                const contents = document.querySelectorAll(".tab-content");
+                contents.forEach((content) =>
+                    content.classList.remove("active"),
+                );
+
+                // Remove active class from all tabs
+                const tabs = document.querySelectorAll(".tab");
+                tabs.forEach((tab) => tab.classList.remove("active"));
+
+                // Show selected tab content
+                document.getElementById(tabName).classList.add("active");
+
+                // Add active class to clicked tab
+                event.target.classList.add("active");
+            }
+
+            // Update UI with current status
+            function updateUI() {
+                updateStatus("water");
+                updateStatus("movement");
+                updateStatus("eyes");
+            }
+
+            // Update status display for a reminder
+            function updateStatus(type) {
+                const statusElement = document.getElementById(`${type}Status`);
+                const nextElement = document.getElementById(`${type}Next`);
+
+                if (app.settings[type]) {
+                    statusElement.textContent = "Active";
+                    statusElement.style.color = "#4CAF50";
+
+                    const nextTime = new Date(Date.now() + app.intervals[type]);
+                    nextElement.textContent = `Next: ${nextTime.toLocaleTimeString()}`;
+                } else {
+                    statusElement.textContent = "Not active";
+                    statusElement.style.color = "#999";
+                    nextElement.textContent = "";
+                }
+            }
+
+            // Start active reminders when page loads
+            function startActiveReminders() {
+                Object.keys(app.settings).forEach((type) => {
+                    if (app.settings[type] && app.intervals[type]) {
+                        startReminder(type);
+                    }
+                });
+            }
+
+            // Handle page visibility change
+            document.addEventListener("visibilitychange", () => {
+                if (!document.hidden) {
+                    updateUI();
+                }
+            });
+
+            // Handle page unload
+            window.addEventListener("beforeunload", () => {
+                Object.keys(app.timers).forEach((type) => stopReminder(type));
+            });
+
+            // Initialize the app when the page loads
+            document.addEventListener("DOMContentLoaded", () => {
+                init();
+                startActiveReminders();
+
+                // Update UI every minute
+                setInterval(updateUI, 60000);
+            });
+
+            // Handle user interaction for audio context (required by browsers)
+            document.addEventListener(
+                "click",
+                () => {
+                    if (
+                        app.audioContext &&
+                        app.audioContext.state === "suspended"
+                    ) {
+                        app.audioContext.resume();
+                    }
+                },
+                { once: true },
+            );
+        </script>
+    </body>
+</html>
